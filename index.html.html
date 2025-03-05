@@ -1,62 +1,108 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>你破防了嗎</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            text-align: center;
-            background-color: #f4f4f4;
-            margin: 0;
-            padding: 20px;
-        }
-        .container {
-            max-width: 600px;
-            background: white;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            margin: auto;
-        }
-        .question {
-            font-size: 20px;
-            margin-bottom: 20px;
-            min-height: 50px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .btn {
-            padding: 10px 20px;
-            font-size: 18px;
-            margin: 10px;
-            cursor: pointer;
-            border: none;
-            border-radius: 5px;
-        }
-        .btn-yes {
-            background-color: red;
-            color: white;
-        }
-        .btn-no {
-            background-color: green;
-            color: white;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>你破防了嗎</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      background-color: #f4f4f4;
+      margin: 0;
+      padding: 20px;
+    }
+    .container {
+      max-width: 600px;
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      margin: auto;
+    }
+    .question {
+      font-size: 20px;
+      margin-bottom: 20px;
+      min-height: 50px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .btn {
+      padding: 10px 20px;
+      font-size: 18px;
+      margin: 10px;
+      cursor: pointer;
+      border: none;
+      border-radius: 5px;
+    }
+    .btn-yes {
+      background-color: red;
+      color: white;
+    }
+    .btn-no {
+      background-color: green;
+      color: white;
+    }
+    .vote-count, .score {
+      font-size: 16px;
+      margin-top: 10px;
+    }
+    .comments {
+      margin-top: 20px;
+      text-align: left;
+    }
+    .comment {
+      background: #eee;
+      padding: 10px;
+      margin: 5px 0;
+      border-radius: 5px;
+    }
+    input {
+      width: calc(100% - 22px);
+      padding: 8px;
+      margin-top: 10px;
+    }
+    button {
+      margin-top: 5px;
+    }
+  </style>
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+  <script>
+    var firebaseConfig = {
+      apiKey: "AIzaSyApYELKuOXZuziXfioTe0fxWfw2FWTHCR0",
+  authDomain: "smash-u.firebaseapp.com",
+  databaseURL: "https://smash-u-default-rtdb.firebaseio.com",
+  projectId: "smash-u",
+  storageBucket: "smash-u.firebasestorage.app",
+  messagingSenderId: "127249508129",
+  appId: "1:127249508129:web:f064c108daa2b76223c060",
+    };
+    firebase.initializeApp(firebaseConfig);
+    var database = firebase.database();
+  </script>
 </head>
 <body>
-    <div class="container">
-        <div class="question" id="question">載入中...</div>
-        <button class="btn btn-yes" onclick="handleYes()">是</button>
-        <button class="btn btn-no" onclick="handleNo()">否</button>
-        <p>破防次數: <span id="score">0</span></p>
+  <div class="container">
+    <div class="question" id="question">載入中...</div>
+    <button class="btn btn-yes" onclick="handleYes()">是</button>
+    <button class="btn btn-no" onclick="nextQuestion()">否</button>
+    <p class="vote-count">按「是」的人數: <span id="yesCount">0</span></p>
+    <div class="comments">
+      <h3>留言區</h3>
+      <div id="commentList"></div>
+      <input type="text" id="commentInput" placeholder="輸入留言...">
+      <button onclick="addComment()">送出</button>
     </div>
+    <p class="score">破防次數: <span id="score">0</span></p>
+  </div>
 
-    <script>
-        const questions = [
-            "我完全沒讀但考一百耶。",
+  <script>
+    const questions = [
+      "我完全沒讀但考一百耶。",
+    
   "我玩了一整個學期結果校排第一耶。",
   "你讀了一整個學期？我的分數是你的兩倍欸。",
   "昨天晚上打了一整晚遊戲，今天考試滿分，哈哈。",
@@ -103,51 +149,57 @@
   "這堂課老師給的分數都是 100，不用擔心啦！",
   "這門課不用來上課也可以 A+ 吧？",
   "你這週考試很忙？我週末出去玩還是考最高。"
-  
-        ];
-
-        while (questions.length < 47) {
-            questions.push("這場考試超簡單，我還提早交卷去喝咖啡。");
-        }
-
-        let currentQuestionIndex = 0;
-        let score = 0;
-
-        function loadQuestion() {
-            const questionElement = document.getElementById("question");
-            if (questionElement) {
-                questionElement.innerText = questions[currentQuestionIndex];
-                console.log("問題載入成功:", questions[currentQuestionIndex]);
-            } else {
-                console.error("無法找到 #question 元素");
-            }
-        }
-
-        function handleYes() {
-            score++;
-            document.getElementById("score").innerText = score;
-            nextQuestion();
-        }
-
-        function handleNo() {
-            nextQuestion();
-        }
-
-        function nextQuestion() {
-            currentQuestionIndex++;
-            if (currentQuestionIndex >= questions.length) {
-                alert("遊戲結束！你的破防次數: " + score);
-                currentQuestionIndex = 0;
-                score = 0;
-                document.getElementById("score").innerText = score;
-            }
-            loadQuestion();
-        }
-
-        window.onload = function() {
-            console.log("頁面載入完成，初始化問題...");
-            loadQuestion();
-        };
-    </script>
+ 
+    ];
+    let currentQuestionIndex = 0;
+    let score = 0;
+    function listenVotes() {
+      database.ref('votes/' + currentQuestionIndex).on('value', snapshot => {
+        document.getElementById("yesCount").innerText = snapshot.val() || 0;
+      });
+    }
+    function listenComments() {
+      database.ref('comments/' + currentQuestionIndex).on('value', snapshot => {
+        const commentList = document.getElementById("commentList");
+        commentList.innerHTML = "";
+        snapshot.forEach(childSnapshot => {
+          let commentDiv = document.createElement("div");
+          commentDiv.className = "comment";
+          commentDiv.innerText = childSnapshot.val();
+          commentList.appendChild(commentDiv);
+        });
+      });
+    }
+    function loadQuestion() {
+      document.getElementById("question").innerText = questions[currentQuestionIndex];
+      listenVotes();
+      listenComments();
+    }
+    function handleYes() {
+      score++;
+      document.getElementById("score").innerText = score;
+      database.ref('votes/' + currentQuestionIndex).transaction(count => (count || 0) + 1);
+      nextQuestion();
+    }
+    function nextQuestion() {
+      currentQuestionIndex++;
+      if (currentQuestionIndex >= questions.length) {
+        alert("遊戲結束！你的破防次數: " + score);
+        currentQuestionIndex = 0;
+        score = 0;
+        document.getElementById("score").innerText = score;
+      }
+      loadQuestion();
+    }
+    function addComment() {
+      let commentInput = document.getElementById("commentInput");
+      let commentText = commentInput.value.trim();
+      if (commentText) {
+        database.ref('comments/' + currentQuestionIndex).push(commentText);
+        commentInput.value = "";
+      }
+    }
+    window.onload = loadQuestion;
+  </script>
 </body>
 </html>
