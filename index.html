@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>你破防了嗎</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 600px;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            margin: auto;
+        }
+        .question {
+            font-size: 20px;
+            margin-bottom: 20px;
+            min-height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .btn {
+            padding: 10px 20px;
+            font-size: 18px;
+            margin: 10px;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+        }
+        .btn-yes {
+            background-color: red;
+            color: white;
+        }
+        .btn-no {
+            background-color: green;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="question" id="question">載入中...</div>
+        <button class="btn btn-yes" onclick="handleYes()">是</button>
+        <button class="btn btn-no" onclick="handleNo()">否</button>
+        <p>破防次數: <span id="score">0</span></p>
+    </div>
+
+    <script>
+        const questions = [
+            "我完全沒讀但考一百耶。",
+  "我玩了一整個學期結果校排第一耶。",
+  "你讀了一整個學期？我的分數是你的兩倍欸。",
+  "昨天晚上打了一整晚遊戲，今天考試滿分，哈哈。",
+  "我上課都在睡覺，結果學測考上台清交。",
+  "作業隨便寫寫，老師還拿我的當模範答案。",
+  "你補習補那麼多？我沒補結果贏你一百分欸。",
+  "考前才讀一天，結果比你認真準備半年還高分。",
+  "你拼了命考 90 分，我放水考 99 分。",
+  "啊？你在準備研究所？我隨便考考就上國外名校了。",
+  "你說這次考試很難？我寫完還剩半小時欸！？",
+  "我沒讀，結果老師還誇我答題方式超棒！",
+  "考試都考課本內容，你怎麼還會錯？",
+  "考前老師說的重點，我剛好都有背到耶！",
+  "這次考試我只讀了一個晚上，結果還是考滿分。",
+  "我連筆記都沒寫過，結果成績最好！",
+  "我沒帶計算機，結果手算剛好全對。",
+  "你還在寫？我考完還有時間滑手機。",
+  "這次考試是開書考，但其實根本不用翻書。",
+  "這考試好簡單，難道只有我覺得這樣嗎？",
+  "不小心寫錯一題，不然就滿分了。",
+  "老師出的題目我之前在某本書上看過，剛好有印象。",
+  "這次考試其實不用準備吧？",
+  "考試的時候我隨手一猜，結果剛好猜對了。",
+  "考前還在看漫畫，結果考超好！",
+  "你有聽老師講課嗎？我沒聽也都會寫。",
+  "老師講課好慢，我都已經在寫下一章了。",
+  "你還在補習？我沒補也可以考這麼高。",
+  "補習班老師教的跟學校一模一樣，沒什麼好補的吧？",
+  "這作業不用寫也沒差，老師不會改。",
+  "你比我努力這麼多，結果成績還沒我高？",
+  "你有參加這次競賽？不好意思，我拿冠軍了。",
+  "你學這麼久？我一週內就會了。",
+  "你的 GPA 3.8？我的 4.3 耶。",
+  "學校辦活動？我不去，結果老師直接送我 10 分加分。",
+  "這篇論文老師幫我發到期刊了，你的呢？",
+  "你報告寫 10 頁？我 1 頁就拿滿分了。",
+  "學長姐的作品好厲害？可是我覺得還好耶。",
+  "這場演講？老師叫我臨時上去，結果還拿第一。",
+  "這麼簡單的作業，還需要討論？",
+  "你還在寫暑假作業？我兩天內就寫完了。",
+  "我們這組分工？不用，我一個人做比較快。",
+  "這麼拼命讀書？結果還是輸我。",
+  "你的專題？我幾天內就寫出來了。",
+  "這堂課老師給的分數都是 100，不用擔心啦！",
+  "這門課不用來上課也可以 A+ 吧？",
+  "你這週考試很忙？我週末出去玩還是考最高。"
+  
+        ];
+
+        while (questions.length < 47) {
+            questions.push("這場考試超簡單，我還提早交卷去喝咖啡。");
+        }
+
+        let currentQuestionIndex = 0;
+        let score = 0;
+
+        function loadQuestion() {
+            const questionElement = document.getElementById("question");
+            if (questionElement) {
+                questionElement.innerText = questions[currentQuestionIndex];
+                console.log("問題載入成功:", questions[currentQuestionIndex]);
+            } else {
+                console.error("無法找到 #question 元素");
+            }
+        }
+
+        function handleYes() {
+            score++;
+            document.getElementById("score").innerText = score;
+            nextQuestion();
+        }
+
+        function handleNo() {
+            nextQuestion();
+        }
+
+        function nextQuestion() {
+            currentQuestionIndex++;
+            if (currentQuestionIndex >= questions.length) {
+                alert("遊戲結束！你的破防次數: " + score);
+                currentQuestionIndex = 0;
+                score = 0;
+                document.getElementById("score").innerText = score;
+            }
+            loadQuestion();
+        }
+
+        window.onload = function() {
+            console.log("頁面載入完成，初始化問題...");
+            loadQuestion();
+        };
+    </script>
+</body>
+</html>
